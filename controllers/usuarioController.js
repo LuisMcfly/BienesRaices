@@ -65,15 +65,16 @@ const autenticar = async (req, res) => {
 
     return res.cookie('_token', token, {
         httpOnly: true,
-        // secure: true certificado SSL
-    })
+        secure: true,
+        sameSite: true
+    }).redirect('/mis-propiedades')
 }
 
 const formularioRegistro = (req, res) => {
     res.render('auth/registro', {
     pagina: 'Crear Cuenta',
     csrfToken: req.csrfToken()
-}).redirect('/mis-propiedades')
+})
 }
 
 // Logica para la creacion del usuario
