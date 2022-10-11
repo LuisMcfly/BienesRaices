@@ -1,16 +1,76 @@
 import { check, validationResult} from 'express-validator'
+import bcrypt from 'bcrypt'
 import usuario from "../models/usuario.js"
-import { generarId } from '../helpers/tokens.js'
-import { emailRegistro } from '../helpers/emails.js'
+import { generarJWT, generarId } from '../helpers/tokens.js'
+import { emailRegistro, emailRecuperarPassword } from '../helpers/emails.js'
 
 const formularioLogin = (req, res) => {res.render('auth/login', {
-    pagina: 'Login'
+    pagina: 'Iniciar Sesión',
+    csrfToken: req.csrfToken()
 })
 }
 
-const formularioRegistro = (req, res) => {
+const autenticar = async (req, res) => {
+    // Validacion
+    await check('email').isEmail().withMessage('El email es obligatorio').run(req)
+    await check('password').notEmpty().withMessage('La contraseña es obligatoria').run(req)
+
+    let resultado = validationResult(req)
+
+    //Verificar que el resultado no este vacio
+    if(!resultado.isEmpty()){
+        return res.render('auth/login', {
+                pagina: 'Iniciar Sesión',
+                csrfToken: req.csrfToken(),
+                errores: resultado.array(),
+        })
+    }
+
+    // Comprobar si el usuario existe
+
+    const {email, password} = req.body;
+
+    const Usuario = await usuario.findOne({where : {email}});
+    if(!Usuario){
+        return res.render('auth/login', {
+            pagina: 'Iniciar Sesión',
+            csrfToken: req.csrfToken(),
+            errores: [{msg: 'El usuario no existe'}]
+        })
+    }
+
+    // Comprobar si el usuario esta confirmado
+    if(!Usuario.confirmado){
+        return res.render('auth/login', {
+        pagina: 'Iniciar Sesión',
+        csrfToken: req.csrfToken(),
+        errores: [{msg: 'Tu cuenta no ha sido confirmada'}]
+    })
+    }
+    // Revisar el password
+
+    if(!Usuario.verificarPassword(password)){
+        return res.render('auth/login', {
+            pagina: 'Iniciar Sesión',
+            csrfToken: req.csrfToken(),
+            errores: [{msg: 'La contraseña es incorrecta'}]
+        })
+    }
+
+    // Autenticar al usuario
+    const token = generarJWT({id: Usuario.id, nombre: Usuario.nombre});
     
 
+    // Almacenar en un cookie
+
+    return res.cookie('_token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: true
+    }).redirect('/mis-propiedades')
+}
+
+const formularioRegistro = (req, res) => {
     res.render('auth/registro', {
     pagina: 'Crear Cuenta',
     csrfToken: req.csrfToken()
@@ -32,6 +92,7 @@ const registrar = async (req, res) => {
     if(!resultado.isEmpty()){
         return res.render('auth/registro', {
                 pagina: 'Crear Cuenta',
+                csrfToken: req.csrfToken(),
                 errores: resultado.array(),
                 usuario: {
                     nombre: req.body.nombre,
@@ -112,17 +173,115 @@ const formularioRecuperarPassword = (req, res) => {res.render('auth/recuperar-pa
 })
 }
 
-const resetPassword = (req, res) => {
+const resetPassword = async (req, res) => {
+    // Validacion
+    await check('email').isEmail().withMessage('Eso no parece un email').run(req)
     
+    //Mostrar errores y hacer la validacion
+    let resultado = validationResult(req)
+
+    //Verificar que el resultado este vacio
+    if(!resultado.isEmpty()){
+        // Errores
+        return res.render('auth/recuperar-password', {
+            pagina: 'Recuperar Contraseña',
+            csrfToken: req.csrfToken(),
+            errores: resultado.array()
+        })
+    }
+
+    // Buscar el usuario
+    const { email } = req.body
+
+    const Usuario = await usuario.findOne({where: {email}});
+    if(!Usuario){
+        return res.render('auth/recuperar-password', {
+            pagina: 'Recuperar Contraseña',
+            csrfToken: req.csrfToken(),
+            errores: [{msg: 'El email no se encuentra registrado'}]
+        })
+    }
+
+    // Generar un token y enviar el email
+    Usuario.token = generarId();
+    await Usuario.save();
+
+    // Enviar email
+    emailRecuperarPassword({
+        email: Usuario.email,
+        nombre: Usuario.nombre,
+        token: Usuario.token
+    })
+
+    // Renderizar un mensaje
+    res.render('templates/mensaje', {
+        pagina: 'Reestablece tu contraseña',
+        mensaje: 'Hemos enviado un email con las instrucciones'
+    })
+}
+
+const comprobarToken = async (req,res) => {
+    const { token } = req.params;
+
+    const Usuario = await usuario.findOne({where: {token}})
+    if(!Usuario){
+        return res.render('auth/confirmarCuenta',{
+            pagina: 'Restablece tu contraseña',
+            mensaje: 'Hubo un error al validar tu información, intentalo nuevamente',
+            error: true
+        })
+    }
+
+    // Mostrar un formulario para modificar el password
+    res.render('auth/reset-password', {
+        pagina: 'Reestablece tu contraseña',
+        csrfToken: req.csrfToken()
+    })
+}
+
+const nuevoPassword = async (req,res) => {
+    // Validar el password
+    await check('password').isLength({ min: 6 }).withMessage('La contraseña debe tener por lo menos 6 caracteres').run(req)
+
+    let resultado = validationResult(req)
+
+    //Verificar que el resultado este vacio
+    if(!resultado.isEmpty()){
+        return res.render('auth/reset-password', {
+                pagina: 'Reestablece tu contraseña',
+                csrfToken: req.csrfToken(),
+                errores: resultado.array(),
+        })
+    }
+
+    const { token } = req.params
+    const { password } = req.body;
+    // Indentificar quien hace la peticion
+    const Usuario = await usuario.findOne({where: {token}})
+
+    // Hashear el nuevo password
+    const salt = await bcrypt.genSalt(10);
+    usuario.password = await bcrypt.hash( password, salt);
+    Usuario.token = null;
+
+    await Usuario.save();
+
+    res.render('auth/confirmarCuenta', {
+        pagina: 'Contraseña modificada',
+        mensaje: 'La nueva contraseña se guardo con exito'
+    })
 }
 
 export {
     formularioLogin,
+    autenticar,
     formularioRegistro,
     registrar,
     confirmar,
     formularioRecuperarPassword,
-    resetPassword
+    resetPassword,
+    comprobarToken,
+    nuevoPassword
 } // Aqui estamos importando con export y podriamos incluir varias funciones mas dentro del objeto a diferencia del siguiente que solo podemos exportar uno por archivo
 
 // export default formularioLogin; 

@@ -4,6 +4,7 @@ import express from 'express'; // Nueva forma de importar el express con ECMAscr
 import csrf from 'csurf';
 import cookieParser from 'cookie-parser';
 import usuarioRoutes from './routes/usuarioRoutes.js';
+import propiedadesRoutes from './routes/propiedadesRoutes.js';
 import db from './config/db.js'; // Aqui estamos importando la configuracion de la base de datos
 
 // Crear el app
@@ -38,6 +39,7 @@ app.use(express.static('public'));
 // Routing
 // Con . use lo que hacemos es decirle al app que tome todas las rutas que comiencen con el /. 
 app.use('/auth', usuarioRoutes);
+app.use('/', propiedadesRoutes);
 
 // Definir el puerto y arrancar el servidor
 const port = process.env.PORT || 3000;
