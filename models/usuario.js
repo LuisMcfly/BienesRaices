@@ -25,6 +25,13 @@ const usuario = db.define('usuarios', {
             const salt = await bcrypt.genSalt(10);
             Usuario.password = await bcrypt.hash( Usuario.password, salt);
         }
+    },
+    scopes: {
+        eliminarPassword:{
+            attributes: {
+                exclude: ['password', 'token', 'confirmado', 'createdAt', 'updatedAt']
+            }
+        }
     }
 });
 

@@ -1,6 +1,7 @@
 import { exit } from 'node:process'
-import { Categoria, Precio } from '../models/index.js'
+import { Categoria, Precio, usuario } from '../models/index.js'
 import categorias from "./categorias.js";
+import Usuarios from './usuarios.js';
 import precios from './precios.js';
 import db from "../config/db.js";
 
@@ -15,7 +16,8 @@ const importarDatos = async () => {
         // Insertar los datos
         await Promise.all([
             Precio.bulkCreate(precios),
-            Categoria.bulkCreate(categorias)
+            Categoria.bulkCreate(categorias),
+            usuario.bulkCreate(Usuarios)
         ])
 
         console.log('Datos importados correctamente');
