@@ -9,15 +9,25 @@ block contenido
             span.font-normal Raices
         h2.text-center.text-2xl.font-extrabold= pagina 
 
+        if  errores
+            div(class="max-w-md mx-auto my-10")
+                each error in errores 
+                    p.bg-red-600.text-white.uppercase.text-xs.text-center.p-2.mb-1.font-bold= error.msg
+
         div(class="bg-white shadow py-8 px-4 rounded mx-auto max-w-4xl my-10 md:px-10")
-            form(action="").space-y-8
+            form(method="POST" action="/propiedades/crear").space-y-8
+                input(type="hidden" name="_csrf" value= csrfToken)
                 div.space-y-8
                     h3.text-lg.leading-6.font-medium.text-gray-900 Información General 
                     p.text-gray-600 Añade Información sobre la propiedad en venta
 
                     div 
                         label.block.text-sm.uppercase.text-gray-500.mb-2.font-bold(for="titulo") Titulo de anuncio
-                        input#titulo.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="Titulo Propiedad, ej. Casa en la playa" type="text" name="titulo")
+                        input#titulo.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="Titulo Propiedad, ej. Casa en la playa" type="text" name="titulo" value= datos.titulo ? datos.titulo: '')
+
+                    div 
+                        label.block.text-sm.uppercase.text-gray-500.mb-2.font-bold(for="descripcion") Descripcion
+                        textarea#descripcion.titulo.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(placeholder="¿Quieres describir algo de tu propiedad? Este es el espacio para hacerlo!" name="descripcion")= datos.descripcion ? datos.descripcion: ''
 
                     div(class="md:flex md:gap-4 space-y-5 md:space-y-0")
 
@@ -25,11 +35,15 @@ block contenido
                             label.block.text-sm.uppercase.text-gray-500.mb-2.font-bold(for="categoria") Categoria 
                             select#categoria.titulo.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(name="categoria")
                                 option(value="") - Seleccione -  
-
+                                each categoria in categorias
+                                    option(value=categoria.id selected= datos.categoria ? datos.categoria == categoria.id ? true : false : null)= categoria.nombre 
+ 
                         div(class="md:w-1/2")
                             label.block.text-sm.uppercase.text-gray-500.mb-2.font-bold(for="precio") Precio  
                             select#precio.titulo.w-full.px-3.py-2.border.border-gray-300.rounded-md.placeholder-gray-400(name="precio")
                                 option(value="") - Seleccione -  
+                                each precio in precios
+                                    option(value=precio.id selected= datos.precio ? datos.precio == precio.id ? true : false : null)= precio.nombre
 
                     div(class="md:flex md:gap-4 space-y-5 md:space-y-0")
 
@@ -39,7 +53,7 @@ block contenido
                                 option(value="") - Seleccione - 
                                 - let habitacionesN = 1; 
                                     while habitacionesN < 6
-                                        option(value=habitacionesN) #{habitacionesN++} 
+                                        option(value=habitacionesN selected= datos.habitaciones ? datos.habitaciones == habitacionesN ? true : false : null) #{habitacionesN++} 
 
                         div(class="md:w-1/3")
                             label.block.text-sm.uppercase.text-gray-500.mb-2.font-bold(for="estacionamiento") Estacionamientos  
@@ -47,7 +61,7 @@ block contenido
                                 option(value="") - Seleccione - 
                                 - let estacionamientosN = 1; 
                                     while estacionamientosN < 4
-                                        option(value=estacionamientosN) #{estacionamientosN++} 
+                                        option(value=estacionamientosN selected= datos.estacionamiento ? datos.estacionamiento == estacionamientosN ? true : false : null) #{estacionamientosN++} 
 
                         div(class="md:w-1/3")
                             label.block.text-sm.uppercase.text-gray-500.mb-2.font-bold(for="wc") WC  
@@ -55,7 +69,7 @@ block contenido
                                 option(value="") - Seleccione - 
                                 - let wcs = 1; 
                                     while wcs < 5
-                                        option(value=wcs) #{wcs++} 
+                                        option(value=wcs selected= datos.wc ? datos.wc == wcs ? true : false : null) #{wcs++} 
 
                     div.border-gray-200.border-t.py-5.space-y-5               
                         h3.text-lg.leading-6.font-medium.text-gray-900 Ubicación 
@@ -63,11 +77,13 @@ block contenido
                         #mapa.h-96
 
                         div 
-                            p.calle 
+                            p.calle= datos.calle ? datos.calle : ''
 
-                        input(type="hidden" name="calle" id="calle")
-                        input(type="hidden" name="lat" id="lat")
-                        input(type="hidden" name="lng" id="lng")
+                        input(type="hidden" name="calle" id="calle" value= datos.calle ? datos.calle : '')
+                        input(type="hidden" name="lat" id="lat" value= datos.lat ? datos.lat : '')
+                        input(type="hidden" name="lng" id="lng" value= datos.lng ? datos.lng : '')
+
+                    input(class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 rounded text-white font-bold uppercase cursor-pointer" type="submit" value="Añadir Imagen")
 
 
 
