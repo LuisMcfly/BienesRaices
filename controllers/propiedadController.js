@@ -2,9 +2,22 @@ import { Precio, Categoria, Propiedad} from '../models/index.js'
 import { validationResult } from "express-validator"
 
 
-const admin = (req, res) => {
+const admin = async (req, res) => {
+    // Traer la informacion del usuario
+    const { id } = req.Usuario
+    const propiedades = await Propiedad.findAll({
+        where: {
+            usuarioId: id
+        },
+        include: [
+            {model: Categoria, as: 'categoria'}, // Aqui estamos cruzando la informacion para poder obtener el nombre de el id que se esta relacionando en la tabla de propiedades
+            {model: Precio, as: "precio"}
+        ]
+    })
+
     res.render('propiedades/admin', {
         pagina: 'Mis Propiedades',
+        propiedades,
     })
 }
 

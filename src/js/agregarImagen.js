@@ -21,11 +21,11 @@ Dropzone.options.imagen = {
         const btnPublicar = document.querySelector('#publicar');
 
         btnPublicar.addEventListener('click', function(){
-            dropzone.ProcessQueue()
+            dropzone.processQueue()
         });
 
         dropzone.on('queuecomplete', function(){
-            if(dropzone.getActiveFiles().length === 0) {
+            if(dropzone.getActiveFiles().length == 0) {
                 window.location.href = '/mis-propiedades'
             }
         })
