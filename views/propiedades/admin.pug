@@ -35,7 +35,8 @@ block contenido
 
                                     a(href=`/propiedades/editar/${propiedad.id}` class="text-center px-2 py-2 md:py-1 text-xs leading-5 font-semibold rounded cursor-pointer bg-indigo-100 text-indigo-800") Editar
 
-                                    form(action="" method="")
-                                         input(type="submit" class="w-full px-2 py-2 md:py-1 text-xs leading-5 font-semibold rounded cursor-pointer bg-red-100 text-red-800" value="Eliminar")
+                                    form(action=`/propiedades/eliminar/${propiedad.id}` method="POST")
+                                        input(type="hidden" name="_csrf" value= csrfToken)
+                                        input(type="submit" class="w-full px-2 py-2 md:py-1 text-xs leading-5 font-semibold rounded cursor-pointer bg-red-100 text-red-800" value="Eliminar")
         else 
             p.text-center No Hay propiedades
