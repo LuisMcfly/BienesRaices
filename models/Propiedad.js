@@ -3,8 +3,8 @@ import db from '../config/db.js'
 
 const Propiedad = db.define('Propiedades', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        type: DataTypes.UUID(5),
+        defaultValue: DataTypes.UUIDV4(5),
         allowNull: false,
         primaryKey: true
     },
