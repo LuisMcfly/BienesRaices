@@ -1,0 +1,54 @@
+extends ../layout/app
+
+block styles 
+    link(rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css")
+
+block contenido 
+
+
+    div(class="py-5")
+        h1(class="text-4xl my-10 font-extrabold text-center")= propiedad.titulo
+
+        div 
+            a(href="#" class="font-bold text-gray-600 text-sm") Categoria: 
+                span(class="font-normal")= propiedad.categoria.nombre
+
+
+        div(class="mt-5 md:flex md:gap-4")
+            div(class="md:w-2/3 bg-white shadow rounded-lg")
+                img(src=`/uploads/${propiedad.imagen}`, alt=`Imagen de la propiedad ${propiedad.titulo}`)
+
+                div(class="px-5 py-10 space-y-5")
+                    p= propiedad.descripcion
+
+                    h2(class="text-2xl leading-6 font-bold text-gray-900") Información Propiedad
+
+                    div(class="grid grid-cols-1 md:grid-cols-2 gap-4")
+                        p(class="text-gray-600 font-bold text-xs") wc 
+                            span(class="text-gray-800 block text-lg")= propiedad.wc
+
+                        p(class="text-gray-600 font-bold text-xs") Habitaciones 
+                            span(class="text-gray-800 block text-lg")= propiedad.habitaciones
+
+                        p(class="text-gray-600 font-bold text-xs") Estacionamiento
+                            span(class="text-gray-800 block text-lg")= propiedad.estacionamiento
+
+                        p(class="text-gray-600 font-bold text-xs") Precio
+                            span(class="text-gray-800 block text-lg")= propiedad.precio.nombre
+
+
+            div(class="md:w-1/3")
+                h3(class="text-center py-10 leading-6 text-2xl font-bold text-gray-900") Ubicación
+
+                div(class="h-96" id="mapa")
+                    p(id="lat" class="hidden")= propiedad.lat
+                    p(id="lng" class="hidden")= propiedad.lng
+
+                div(class="p-5")
+                    p(class="text-gray-600 font-bold text-xs") Dirección 
+                        span(id="calle" class="text-gray-800 block text-lg")= propiedad.calle
+
+
+block scripts 
+    script(src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js")
+    script(src="/js/mostrarMapa.js")

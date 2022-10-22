@@ -295,6 +295,30 @@ const eliminar = async (req, res) => {
     res.redirect('/mis-propiedades')
 }
 
+// Mostrar una propiedad
+const mostrarPropiedad = async (req, res) => {
+    // Validar que la propiedad exista
+    const { id } = req.params
+    const propiedad = await Propiedad.findByPk(id, {
+        include: [
+            {model: Precio, as: 'precio'},
+            {model: Categoria, as: 'categoria'}
+        ]
+    })
+
+    if(!propiedad) {
+        return res.redirect('/404')
+    }
+
+
+
+    res.render('propiedades/mostrar', {
+        propiedad,
+        pagina: propiedad.titulo,
+        
+    })
+}
+
 export {
     admin,
     crear,
@@ -303,5 +327,6 @@ export {
     almacenarImagen,
     editar,
     guardarCambios,
-    eliminar
+    eliminar,
+    mostrarPropiedad
 }
