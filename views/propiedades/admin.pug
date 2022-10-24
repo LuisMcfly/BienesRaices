@@ -38,5 +38,24 @@ block contenido
                                     form(action=`/propiedades/eliminar/${propiedad.id}` method="POST")
                                         input(type="hidden" name="_csrf" value= csrfToken)
                                         input(type="submit" class="w-full px-2 py-2 md:py-1 text-xs leading-5 font-semibold rounded cursor-pointer bg-red-100 text-red-800" value="Eliminar")
+        
+            div(class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6")
+                div(class="flex-1 flex justify-between sm:hidden")
+                    a(href=`/mis-propiedades?pagina=${paginaActual - 1}` class=`${paginaActual === 1 ? 'hidden pointer-events-none' : ''} relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50`) Anterior 
+                    a(href=`/mis-propiedades?pagina=${paginaActual + 1}` class=`${paginaActual === paginas ? 'hidden pointer-events-none' : ''} relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50`) Siguiente
+
+                div(class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between")
+                    p(class="text-sm text-gray-700 gap-2") Mostrando 
+                        span(class="font-medium") #{offset + 1} a 
+                        span(class="font-medium") #{total < limit + offset ? total : limit + offset} de 
+                        span(class="font-medium") #{total} resultados
+
+                div(class="hidden sm:block")
+                    nav(class="relative z-0 inline-flex rounded-md shadow-md") 
+                        - var n = 1;
+                            while  n <= paginas 
+                                a(href=`/mis-propiedades?pagina=${n}` class=`${paginaActual == n ? 'bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-100'} relative inline-flex items-center px-4 py-2 border text-sm font-medium`) #{n++}     
+
+
         else 
             p.text-center No Hay propiedades

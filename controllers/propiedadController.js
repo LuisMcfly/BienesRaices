@@ -1,26 +1,64 @@
 import { Precio, Categoria, Propiedad} from '../models/index.js'
 import { validationResult } from "express-validator"
 import { unlink } from 'node:fs/promises'
+import { log } from 'node:console'
+import { match } from 'node:assert'
 
 
 const admin = async (req, res) => {
-    // Traer la informacion del usuario
-    const { id } = req.Usuario
-    const propiedades = await Propiedad.findAll({
-        where: {
-            usuarioId: id
-        },
-        include: [
-            {model: Categoria, as: 'categoria'}, // Aqui estamos cruzando la informacion para poder obtener el nombre de el id que se esta relacionando en la tabla de propiedades
-            {model: Precio, as: "precio"}
-        ]
-    })
+
+    // Leer QueryString
+    const { pagina: paginaActual } = req.query
+    // Expresion regular
+    const expresion = /^[1-9]$/
+
+    if(!expresion.test(paginaActual)){
+        return res.redirect('/mis-propiedades?pagina=1')
+    }
+
+    try {
+         // Traer la informacion del usuario
+        const { id } = req.Usuario
+
+        // Limites y Offset para el paginador
+        const limit = 10;
+        const offset = ((paginaActual * limit) - limit)
+
+        const [propiedades, total] = await Promise.all([
+            await Propiedad.findAll({
+                limit,
+                offset,
+                where: {
+                    usuarioId : id
+                },
+                include: [
+                    {model: Categoria, as: 'categoria'},
+                    {model: Precio, as: 'precio'}
+                ],
+            }),
+            Propiedad.count({
+                where: {
+                    usuarioId: id
+                }
+            })
+        ])
 
     res.render('propiedades/admin', {
         pagina: 'Mis Propiedades',
         propiedades,
         csrfToken: req.csrfToken(),
+        paginas: Math.ceil(total / limit),
+        paginaActual: Number(paginaActual),
+        total,
+        offset,
+        limit
     })
+
+    } catch (error) {
+        console.log(error);
+    }
+
+   
 }
 
 
