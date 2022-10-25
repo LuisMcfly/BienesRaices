@@ -1,4 +1,7 @@
 (function() {
+
+
+    // Logical Or
     const lat = document.querySelector('#lat').value || 6.1763685;
     const lng = document.querySelector('#lng').value || -75.5906409;
     const mapa = L.map('mapa').setView([lat, lng ], 14);
