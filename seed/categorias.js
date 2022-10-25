@@ -1,6 +1,6 @@
 const categorias = [
     {
-        nombre: 'casa'
+        nombre: 'Casa'
     },
     {
         nombre: 'Departamento'
